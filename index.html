@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MSD v8.1 | Calm Topology</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="msd-container">
+        <aside class="service-fleet">
+            <div class="panel-header">
+                LOGICAL SERVICES (FLEET)
+                <button id="motion-toggle" class="btn-toggle">MOTION: ON</button>
+            </div>
+            <div class="hex-grid" id="service-grid">
+                </div>
+        </aside>
+
+        <main class="topology-viewer">
+            <header class="viewer-header" id="ambient-target">
+                <div>
+                    <h1><span id="view-title" class="data-value">AWAITING SERVICE SELECTION</span></h1>
+                    <h2><span id="view-subtitle" class="data-value">TRIAD QUORUM STATUS: --</span></h2>
+                </div>
+                <div class="latency-legend">
+                    <span class="legend-item"><div class="dot fast"></div> <50ms</span>
+                    <span class="legend-item"><div class="dot slow"></div> >200ms</span>
+                    <span class="legend-item"><div class="dot drop"></div> FAULT</span>
+                </div>
+            </header>
+
+            <div class="map-container">
+                <div class="map-underlay"></div>
+                <svg id="topology-layer" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice">
+                    <g id="layer-quorum-links"></g>
+                    <g id="layer-client-links"></g>
+                    <g id="layer-nodes"></g>
+                    <g id="layer-traffic"></g> </svg>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
