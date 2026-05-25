@@ -1,0 +1,106 @@
+:root {
+    --bg-base: #06090e;
+    --panel-bg: #0a0f16;
+    --cyan: #00f2fe;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --dark: #1e293b;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --grid: rgba(255, 255, 255, 0.05);
+    /* Strict ease-out curve per specifications */
+    --ease-gentle: cubic-bezier(0.2, 0.0, 0, 1.0);
+}
+
+body { margin: 0; background: var(--bg-base); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; height: 100vh; overflow: hidden; }
+.msd-container { display: flex; height: 100%; padding: 15px; box-sizing: border-box; gap: 15px; }
+
+/* Structural */
+.service-fleet { width: 300px; background: var(--panel-bg); border: 1px solid var(--grid); display: flex; flex-direction: column; border-radius: 4px; }
+.panel-header { padding: 12px; font-size: 10px; font-weight: 800; letter-spacing: 2px; border-bottom: 1px solid var(--grid); color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; }
+.btn-toggle { background: transparent; border: 1px solid var(--text-dim); color: var(--text-dim); font-size: 8px; cursor: pointer; padding: 3px 6px; transition: 0.3s; }
+.btn-toggle.active { color: var(--cyan); border-color: var(--cyan); }
+
+.hex-grid { padding: 15px; display: flex; flex-wrap: wrap; gap: 8px; overflow-y: auto; align-content: flex-start; }
+.service-hex { 
+    width: 60px; height: 65px; background: var(--dark);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; border: 1px solid transparent;
+    position: relative;
+}
+.service-hex.active-view { background: var(--cyan); color: #000; }
+.service-hex .lbl { font-size: 10px; font-weight: bold; pointer-events: none; }
+.service-hex .stat { font-size: 8px; margin-top: 2px; pointer-events: none; }
+
+/* Main Viewer */
+.topology-viewer { flex-grow: 1; background: var(--panel-bg); border: 1px solid var(--grid); display: flex; flex-direction: column; border-radius: 4px; position: relative; }
+.viewer-header { padding: 20px; border-bottom: 1px solid var(--grid); display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid transparent; }
+.viewer-header h1 { margin: 0; font-size: 20px; font-weight: 300; letter-spacing: 2px; color: var(--cyan); }
+.viewer-header h2 { margin: 5px 0 0 0; font-size: 11px; color: var(--text-dim); letter-spacing: 1px; }
+
+/* Data Shimmer */
+.data-value { display: inline-block; padding: 2px 4px; border-radius: 2px; }
+
+/* Legend & Map */
+.latency-legend { display: flex; gap: 15px; font-size: 9px; color: var(--text-dim); font-weight: bold; }
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot.fast { background: var(--cyan); } .dot.slow { background: var(--amber); } .dot.drop { background: var(--red); }
+
+.map-container { flex-grow: 1; position: relative; overflow: hidden; }
+.map-underlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg');
+    background-size: cover; background-position: center;
+    opacity: 0.1; filter: invert(1) sepia(1) hue-rotate(180deg) saturate(200%);
+}
+#topology-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+/* Static SVG Nodes */
+.node-datacenter { fill: rgba(0,0,0,0.8); stroke: var(--cyan); stroke-width: 2; }
+.node-client { fill: var(--dark); stroke: var(--text-dim); stroke-width: 1; }
+.node-label { fill: var(--text); font-size: 10px; font-family: monospace; pointer-events: none; }
+.node.fault .node-datacenter { stroke: var(--red); fill: rgba(239, 68, 68, 0.2); }
+
+.link { fill: none; stroke-width: 1.5; opacity: 0.2; }
+.link.quorum { stroke: var(--cyan); stroke-width: 2; opacity: 0.4; stroke-dasharray: 4 4; }
+.link.quorum.degraded { stroke: var(--amber); }
+.link.client { stroke: var(--text-dim); }
+
+/* --- 8.1 MOTION DESIGN SYSTEM --- */
+
+/* 1. Aliveness (Max 1, >=6s period) */
+@keyframes ambient-pulse {
+    0% { border-top-color: transparent; }
+    50% { border-top-color: rgba(0, 242, 254, 0.15); }
+    100% { border-top-color: transparent; }
+}
+.motion-enabled #ambient-target { animation: ambient-pulse 8s linear infinite; }
+
+/* 2. Interaction Feedback (<300ms ripple) */
+@keyframes interact-ripple {
+    0% { background-color: rgba(255, 255, 255, 0.3); }
+    100% { background-color: transparent; }
+}
+.click-ripple { animation: interact-ripple 300ms var(--ease-gentle) forwards; }
+
+/* 3. State Change & Alerts (One-time glow, 400-800ms) */
+@keyframes alert-glow {
+    0% { filter: drop-shadow(0 0 15px currentColor); stroke-width: 4; }
+    100% { filter: drop-shadow(0 0 0px transparent); stroke-width: 2; }
+}
+.state-alert .node-datacenter { animation: alert-glow 800ms var(--ease-gentle) forwards; }
+
+/* 4. Data Refresh (Background shimmer, 400ms) */
+@keyframes data-shimmer {
+    0% { background-color: rgba(255, 255, 255, 0.2); }
+    100% { background-color: transparent; }
+}
+.refresh-shimmer { animation: data-shimmer 400ms var(--ease-gentle) forwards; }
+
+/* 5. Accessibility Override */
+@media (prefers-reduced-motion: reduce) {
+    .motion-enabled #ambient-target { animation: none !important; }
+    .click-ripple, .state-alert .node-datacenter, .refresh-shimmer { animation-duration: 0.01ms !important; }
+}
